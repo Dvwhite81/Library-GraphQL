@@ -1,28 +1,42 @@
-const Authors = (props) => {
-  if (!props.show) {
+import { useQuery } from '@apollo/client'
+import BirthyearForm from './BirthyearForm'
+import { ALL_AUTHORS } from '../queries'
+
+const Authors = ({ show, notify }) => {
+  const result = useQuery(ALL_AUTHORS)
+
+  if (!show) {
     return null
   }
-  const authors = []
+
+  if (result.loading) {
+    return <div>loading...</div>
+  }
+
+  const authors = result.data.allAuthors
 
   return (
     <div>
-      <h2>authors</h2>
-      <table>
-        <tbody>
-          <tr>
-            <th></th>
-            <th>born</th>
-            <th>books</th>
-          </tr>
-          {authors.map((a) => (
-            <tr key={a.name}>
-              <td>{a.name}</td>
-              <td>{a.born}</td>
-              <td>{a.bookCount}</td>
+      <div>
+        <h2>authors</h2>
+        <table>
+          <tbody>
+            <tr>
+              <th></th>
+              <th>born</th>
+              <th>books</th>
             </tr>
-          ))}
-        </tbody>
-      </table>
+            {authors.map((a) => (
+              <tr key={a.name}>
+                <td>{a.name}</td>
+                <td>{a.born}</td>
+                <td>{a.bookCount}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+      <BirthyearForm notify={notify} authors={authors} />
     </div>
   )
 }
