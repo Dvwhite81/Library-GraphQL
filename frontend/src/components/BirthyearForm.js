@@ -3,29 +3,22 @@ import { useMutation } from '@apollo/client'
 import { ALL_AUTHORS, SET_BIRTHYEAR } from '../queries'
 
 const BirthyearForm = ({ notify, authors }) => {
-  const options = []
-  authors.forEach(a => {
-    options.push(
-      { value: a.name, label: a.name }
-    )
-  })
-
-  console.log('options:', options)
-
   const [name, setName] = useState('')
   const [born, setBorn] = useState('')
 
-  const [ editAuthor ] = useMutation(SET_BIRTHYEAR, {
-    refetchQueries: [ { query: ALL_AUTHORS } ],
+  const [editAuthor] = useMutation(SET_BIRTHYEAR, {
+    refetchQueries: [{ query: ALL_AUTHORS }],
     onError: (error) => {
-      const messages = error.graphQLErrors.map(e => e.message).join('\n')
+      const messages = error.graphQLErrors.map((e) => e.message).join('\n')
       notify(messages)
-    }
+    },
   })
 
   const submit = (event) => {
     event.preventDefault()
-    editAuthor({ variables: { name, born } })
+    console.log('submit name:', name)
+    console.log('submit born:', born)
+    editAuthor({ variables: { name, setBornTo: born } })
     console.log('set birthyear')
 
     setName('')
@@ -38,7 +31,8 @@ const BirthyearForm = ({ notify, authors }) => {
       <form onSubmit={submit}>
         <div>
           <select value={name} onChange={({ target }) => setName(target.value)}>
-            {authors.map(a => (
+            <option disabled value={''}>---</option>
+            {authors.map((a) => (
               <option key={a.name} value={a.name}>
                 {a.name}
               </option>
@@ -46,7 +40,11 @@ const BirthyearForm = ({ notify, authors }) => {
           </select>
         </div>
         <div>
-          born <input value={born} onChange={({ target }) => setBorn(parseInt(target.value))} />
+          born{' '}
+          <input
+            value={born}
+            onChange={({ target }) => setBorn(parseInt(target.value))}
+          />
         </div>
         <button type='submit'>update author</button>
       </form>

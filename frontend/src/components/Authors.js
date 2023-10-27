@@ -13,6 +13,7 @@ const Authors = ({ show, notify }) => {
     return <div>loading...</div>
   }
 
+  console.log('Authors result:', result)
   const authors = result.data.allAuthors
 
   return (
