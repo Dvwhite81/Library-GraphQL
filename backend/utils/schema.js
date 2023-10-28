@@ -1,4 +1,8 @@
 const typeDefs = `
+  type Subscription {
+    bookAdded: Book!
+  }
+
   type User {
     username: String!
     favoriteGenre: String!
