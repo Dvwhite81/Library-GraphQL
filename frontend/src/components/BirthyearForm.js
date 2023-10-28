@@ -1,12 +1,12 @@
 import { useState } from 'react'
 import { useMutation } from '@apollo/client'
-import { ALL_AUTHORS, SET_BIRTHYEAR } from '../queries'
+import { ALL_AUTHORS, EDIT_AUTHOR } from '../queries'
 
 const BirthyearForm = ({ notify, authors }) => {
   const [name, setName] = useState('')
   const [born, setBorn] = useState('')
 
-  const [editAuthor] = useMutation(SET_BIRTHYEAR, {
+  const [editAuthor] = useMutation(EDIT_AUTHOR, {
     refetchQueries: [{ query: ALL_AUTHORS }],
     onError: (error) => {
       const messages = error.graphQLErrors.map((e) => e.message).join('\n')
@@ -16,10 +16,7 @@ const BirthyearForm = ({ notify, authors }) => {
 
   const submit = (event) => {
     event.preventDefault()
-    console.log('submit name:', name)
-    console.log('submit born:', born)
     editAuthor({ variables: { name, setBornTo: born } })
-    console.log('set birthyear')
 
     setName('')
     setBorn('')

@@ -1,21 +1,22 @@
 import { useQuery } from '@apollo/client'
-import { ALL_BOOKS } from '../queries'
+import { ALL_BOOKS, BOOKS_BY_GENRE } from '../queries'
 import { useState } from 'react'
 
-const Books = (props) => {
-  const [selectedGenre, setSelectedGenre] = useState('All Genres')
+const Books = ({ show }) => {
+  const [selectedGenre, setSelectedGenre] = useState('')
   const result = useQuery(ALL_BOOKS)
+  const genreResult = useQuery(BOOKS_BY_GENRE, { variables: { genre: selectedGenre }, fetchPolicy: 'network-only' })
 
-  if (!props.show) {
+  if (!show) {
     return null
   }
 
-  if (result.loading) {
+  if (result.loading || genreResult.loading) {
     return <div>loading...</div>
   }
 
-  console.log('Books result:', result)
   const books = result.data.allBooks
+  const genreBooks = genreResult.data.booksByGenre
 
   const allGenres = []
   books.forEach(b => {
@@ -25,6 +26,8 @@ const Books = (props) => {
       }
     })
   })
+
+  const booksToShow = selectedGenre === '' ? books : genreBooks
 
   return (
     <div>
@@ -39,19 +42,18 @@ const Books = (props) => {
             <th>author</th>
             <th>published</th>
           </tr>
-          {books
-            .filter(b => b.genres.includes(selectedGenre) || selectedGenre === 'All Genres')
-            .map((a) => (
-              <tr key={a.title}>
-                <td>{a.title}</td>
-                <td>{a.author.name}</td>
-                <td>{a.published}</td>
+          {booksToShow
+            .map((b) => (
+              <tr key={b.title}>
+                <td>{b.title}</td>
+                <td>{b.author.name}</td>
+                <td>{b.published}</td>
               </tr>
             ))}
         </tbody>
       </table>
       <div>
-        <button value={'All Genres'} onClick={() => setSelectedGenre('All Genres')}>All Genres</button>
+        <button  onClick={() => setSelectedGenre('')}>All Genres</button>
         {allGenres.map(g =>
           <button key={g} value={g} onClick={() => setSelectedGenre(g)}>{g}</button>
         )}

@@ -1,9 +1,9 @@
 import { useQuery } from '@apollo/client'
-import { GET_USER, ALL_BOOKS } from '../queries'
+import { GET_USER, BOOKS_BY_GENRE } from '../queries'
 
-const Recommended = ({ show }) => {
+const Recommended = ({ genre, show }) => {
   const user = useQuery(GET_USER)
-  const result = useQuery(ALL_BOOKS)
+  const result = useQuery(BOOKS_BY_GENRE, { variables: { genre: genre }, fetchPolicy: 'network-only' })
 
   if (!show) {
     return null
@@ -13,16 +13,15 @@ const Recommended = ({ show }) => {
     return <div>loading...</div>
   }
 
-  const genre = user.data.me.favoriteGenre
-  const books = result.data.allBooks
-  const genreBooks = books.filter(b => b.genres.includes(genre))
+  const books = result.data.booksByGenre
+  const name = user.data.me.username
 
-  if (genreBooks.length === 0) {
+  if (books.length === 0) {
     return (
       <div>
-        <h2>recommendations</h2>
+        <h2>recommendations for { name }</h2>
         <div>
-          <p>No books in your favorite genre: <strong>{genre}</strong></p>
+          <p>No books in your favorite genre: <strong>{ genre }</strong></p>
         </div>
       </div>
     )
@@ -30,9 +29,9 @@ const Recommended = ({ show }) => {
 
   return (
     <div>
-      <h2>recommendations</h2>
+      <h2>recommendations for { name }</h2>
       <div>
-        <p>books in your favorite genre: <strong>{genre}</strong></p>
+        <p>books in your favorite genre: <strong>{ genre }</strong></p>
       </div>
       <table>
         <tbody>
@@ -41,7 +40,7 @@ const Recommended = ({ show }) => {
             <th>author</th>
             <th>published</th>
           </tr>
-          {genreBooks
+          {books
             .map((b) => (
               <tr key={b.title}>
                 <td>{b.title}</td>

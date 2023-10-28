@@ -32,6 +32,23 @@ const resolvers = {
         return books.filter(b => b.author.name === args.author && b.genres.includes(args.genre))
       }
     },
+    booksByGenre: async (root, args) => {
+      const books = await Book.find({ genres: { $in: [args.genre] } }).populate('author')
+      return books
+    },
+    recommendedBooks: async (root, args, context) => {
+      const currentUser = context.currentUser
+      if (!currentUser) {
+        throw new GraphQLError('not authenticated', {
+          extensions: {
+            code: 'BAD_USER_INPUT',
+          }
+        })
+      }
+
+      const books = await Book.find({ genres: { $in: [currentUser.favoriteGenre] } }).populate('author')
+      return books
+    },
     allAuthors: async () => {
       const authors = await Author.find({})
       return authors
@@ -107,11 +124,9 @@ const resolvers = {
         })
       }
       const author = await Author.findOne({ name: args.name })
-      console.log('resolvers author:', author)
 
       try {
         author.born = args.setBornTo
-        console.log('resolvers author 2:', author)
         await author.save()
       } catch (error) {
         throw new GraphQLError('Saving author failed', {
