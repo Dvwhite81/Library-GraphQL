@@ -46,6 +46,8 @@ const resolvers = {
     allAuthors: async () => {
       const authors = await Author.find({})
       return authors
+      // I think the n + 1 problem is already solved
+      // I have an Author type with a bookCount below
     },
     me: (root, args, context) => {
       return context.currentUser
