@@ -9,14 +9,8 @@ const User = require('../models/user')
 
 const resolvers = {
   Query: {
-    bookCount: async () => {
-      const books = await Book.find({})
-      return books.length
-    },
-    authorCount: async () => {
-      const authors = await Author.find({})
-      return authors.length
-    },
+    bookCount: () => Book.collection.countDocuments(),
+    authorCount: () => Author.collection.countDocuments(),
     allBooks: async (root, args) => {
       const books = await Book.find({}).populate('author')
       if (!args.author && !args.genre) {

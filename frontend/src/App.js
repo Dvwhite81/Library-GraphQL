@@ -1,12 +1,12 @@
 import { useState } from 'react'
-import { useApolloClient, useQuery } from '@apollo/client'
+import { useApolloClient, useQuery, useSubscription } from '@apollo/client'
 import Authors from './components/Authors'
 import Books from './components/Books'
 import NewBook from './components/NewBook'
 import LoginForm from './components/LoginForm'
 import Recommended from './components/Recommended'
 import Notification from './components/Notification'
-import { GET_USER } from './queries'
+import { ALL_BOOKS, BOOK_ADDED, GET_USER } from './queries'
 
 export const updateCache = (cache, query, addedBook) => {
   const uniqByTitle = (a) => {
@@ -30,18 +30,26 @@ const App = () => {
   const [token, setToken] = useState(null)
   const client = useApolloClient()
 
-  const userResult = useQuery(GET_USER)
-  if (userResult.loading) {
-    return <div>loading...</div>
-  }
-  const favoriteGenre = userResult.data.me.favoriteGenre
-
   const notify = (message) => {
     setErrorMessage(message)
     setTimeout(() => {
       setErrorMessage(null)
     }, 5000)
   }
+
+  useSubscription(BOOK_ADDED, {
+    onData: ({ data }) => {
+      const addedBook = data.data.bookAdded
+      notify(`New book: "${addedBook.title}" added`)
+      updateCache(client.cache, { query: ALL_BOOKS }, addedBook)
+    }
+  })
+
+  const userResult = useQuery(GET_USER)
+  if (userResult.loading) {
+    return <div>loading...</div>
+  }
+  const favoriteGenre = userResult.data.me.favoriteGenre
 
   const logout = () => {
     setToken(null)

@@ -1,9 +1,9 @@
 import { useState } from 'react'
 import { useMutation } from '@apollo/client'
 import { updateCache } from '../App'
-import { ALL_BOOKS, ADD_BOOK, BOOKS_BY_GENRE, RECOMMENDED_BOOKS } from '../queries'
+import { ALL_BOOKS, ADD_BOOK } from '../queries'
 
-const NewBook = ({ show, notify }) => {
+const NewBook = ({ notify, show }) => {
   const [title, setTitle] = useState('')
   const [author, setAuthor] = useState('')
   const [published, setPublished] = useState('')
@@ -13,9 +13,13 @@ const NewBook = ({ show, notify }) => {
   const [addBook] = useMutation(ADD_BOOK, {
     update: (cache, response) => {
       updateCache(cache, { query: ALL_BOOKS }, response.data.addBook)
-      updateCache(cache, { query: BOOKS_BY_GENRE }, response.data.booksByGenre)
-      updateCache(cache, { query: RECOMMENDED_BOOKS }, response.data.recommendedBooks)
-    }
+    },
+    onError: (error) => {
+      console.log('error:', error)
+      if (error.graphQLErrors) {
+        notify(error.graphQLErrors[0].message)
+      }
+    },
   })
 
   if (!show) {

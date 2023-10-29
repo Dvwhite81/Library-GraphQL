@@ -28,12 +28,13 @@ const Books = ({ show }) => {
   })
 
   const booksToShow = selectedGenre === '' ? books : genreBooks
+  const genre = selectedGenre === '' ? 'All Genres' : selectedGenre
 
   return (
     <div>
       <h2>books</h2>
       <div>
-        <p>in genre: <strong>{selectedGenre}</strong></p>
+        <p>in genre: <strong>{genre}</strong></p>
       </div>
       <table>
         <tbody>
